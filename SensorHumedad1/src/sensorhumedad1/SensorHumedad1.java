@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 public class SensorHumedad1 {
 
     public static void main(String[] args) {
+        String id = args[0];
         InetAddress ipServidor = null;
         PrintWriter pw;
         try {
@@ -21,14 +22,15 @@ public class SensorHumedad1 {
             System.out.println(cliente);
             pw = new PrintWriter(cliente.getOutputStream(), true); //El segundo parametro activa el autoflush para escribir en el buffer
             pw.println("humedad");
+            pw.println(id);
             HiloSensado sensor = new HiloSensado(cliente, pw);
             sensor.start();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
+
         }
 
     }
-    
 }
