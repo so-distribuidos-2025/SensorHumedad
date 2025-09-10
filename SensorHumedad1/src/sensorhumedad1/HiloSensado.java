@@ -1,58 +1,100 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Clase HiloSensado
+ * -----------------
+ * Representa un hilo que simula el funcionamiento de un sensor de humedad.
+ * 
+ * Funcionalidades principales:
+ *  - Genera valores de humedad de forma aleatoria (entre 0% y 100%).
+ *  - Envía el valor generado al servidor a través de un PrintWriter.
+ *  - Muestra en consola el valor de humedad leído.
+ *  - Permite encender y apagar el sensor con métodos dedicados.
  */
 package sensorhumedad1;
+
 import java.io.PrintWriter;
-import java.lang.Math;
 import java.net.Socket;
 
-/**
- *
- * @author Alumnos
- */
-
-
 public class HiloSensado extends Thread {
-    private boolean on;
-    private float humedad;
-    private Socket cnxServidor;
-    PrintWriter pw;
 
+    /** Indica si el sensor está encendido o apagado */
+    private boolean on;
+
+    /** Último valor de humedad generado */
+    private float humedad;
+
+    /** Socket de conexión con el servidor */
+    private Socket cnxServidor;
+
+    /** Flujo de salida para enviar datos al servidor */
+    private PrintWriter pw;
+
+    /**
+     * Constructor principal del sensor de humedad.
+     *
+     * @param s  Socket de conexión con el servidor
+     * @param pw PrintWriter para enviar los datos al servidor
+     */
     public HiloSensado(Socket s, PrintWriter pw) {
         this.on = true;
         this.humedad = 0;
         this.cnxServidor = s;
         this.pw = pw;
     }
-    
+
+    /**
+     * Constructor alternativo sin conexión a servidor.
+     * Inicializa el sensor encendido con valor de humedad en 0.
+     */
     public HiloSensado() {
         this.on = true;
         this.humedad = 0;
     }
-    
-    
-    public float generarHumedad(){
-    return ((float) Math.random()*100);
+
+    /**
+     * Genera un valor de humedad aleatorio entre 0 y 100.
+     *
+     * @return humedad generada (en porcentaje)
+     */
+    public float generarHumedad() {
+        return (float) (Math.random() * 100);
     }
-    
-    public void encender(){
+
+    /** Enciende el sensor */
+    public void encender() {
         on = true;
     }
-    
-    public void apagar(){
+
+    /** Apaga el sensor */
+    public void apagar() {
         on = false;
     }
-    
-    public float leerHumedad(){
-    return humedad;
+
+    /**
+     * Devuelve el último valor de humedad generado.
+     *
+     * @return valor actual de la humedad
+     */
+    public float leerHumedad() {
+        return humedad;
     }
-    
-    public void run(){
-        /*en este while medimos la humedad*/
-        while(on/*o while(on)*/){
+
+    /**
+     * Método principal del hilo.
+     * Mientras el sensor esté encendido:
+     *  - Genera un nuevo valor de humedad aleatorio.
+     *  - Envía el valor al servidor.
+     *  - Muestra el valor en consola.
+     *  - Espera 1 segundo antes de la próxima lectura.
+     */
+    @Override
+    public void run() {
+        while (on) {
             this.humedad = generarHumedad();
+
+            // Enviar valor al servidor
             pw.println(this.humedad);
+
+            // Mostrar valor por consola
             System.out.println("Humedad: " + leerHumedad());
 
             try {
@@ -60,9 +102,6 @@ public class HiloSensado extends Thread {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-           
         }
     }
-    
-    
 }
