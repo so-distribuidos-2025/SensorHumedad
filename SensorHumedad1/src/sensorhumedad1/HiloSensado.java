@@ -13,6 +13,8 @@ package sensorhumedad1;
 
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class HiloSensado extends Thread {
 
@@ -95,7 +97,7 @@ public class HiloSensado extends Thread {
             pw.println(this.humedad);
 
             // Mostrar valor por consola
-            System.out.println("Humedad: " + leerHumedad());
+            System.out.println(getTiempo() + " | Humedad: " + leerHumedad());
 
             try {
                 Thread.sleep(1000);
@@ -103,5 +105,11 @@ public class HiloSensado extends Thread {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private String getTiempo(){
+        LocalDateTime myDateObj = LocalDateTime.now();
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return myDateObj.format(myFormatObj);
     }
 }
