@@ -28,6 +28,8 @@ public class HiloSensado extends Thread {
     /** Flujo de salida para enviar datos al servidor */
     private PrintWriter pw;
 
+    private boolean isAuto;
+
     /**
      * Constructor principal del sensor de humedad.
      *
@@ -78,6 +80,13 @@ public class HiloSensado extends Thread {
         return humedad;
     }
 
+    public void setValor(double valor) {
+        this.humedad = (float) valor;
+    }
+
+    public void setAuto(boolean auto) {
+        this.isAuto = auto;
+    }
     /**
      * Método principal del hilo.
      * Mientras el sensor esté encendido:
@@ -89,7 +98,9 @@ public class HiloSensado extends Thread {
     @Override
     public void run() {
         while (on) {
-            this.humedad = generarHumedad();
+            if (isAuto) {
+                this.humedad = generarHumedad();
+            }
 
             // Enviar valor al servidor
             pw.println(this.humedad);

@@ -15,6 +15,9 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 
 public class SensorHumedad1 {
 
@@ -49,6 +52,21 @@ public class SensorHumedad1 {
             // Crear e iniciar el hilo que simula el sensado de humedad
             HiloSensado sensor = new HiloSensado(cliente, pw);
             sensor.start();
+
+            // --- Lógica RMI ---
+            int port = 22000;
+            String name = "SensorHumedadRMI" + id;
+            HiloServerRMI hiloServerRMI = new HiloServerRMI(sensor);
+
+            try {
+                LocateRegistry.createRegistry(port);
+                System.out.println("RMI registry created on port " + port);
+            } catch (RemoteException e) {
+                System.out.println("RMI registry already running on port " + port);
+            }
+
+            Naming.rebind("rmi://localhost:" + port + "/" + name, hiloServerRMI);
+            System.out.println(name + " bound in registry");
 
         } catch (UnknownHostException e) {
             throw new RuntimeException("No se pudo resolver el host del servidor", e);
