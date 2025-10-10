@@ -2,7 +2,7 @@
  * Clase principal SensorHumedad1
  * ------------------------------
  * Representa el programa cliente que simula un sensor de humedad.
- * 
+ *
  * Funcionalidades principales:
  *  - Se conecta al servidor central en la dirección IP y puerto especificados.
  *  - Envía su tipo de dispositivo ("humedad") y un identificador único.
@@ -23,7 +23,7 @@ public class SensorHumedad1 {
 
     /**
      * Método principal del programa.
-     * 
+     *
      * @param args Argumentos de línea de comandos.
      *             El primer argumento (args[0]) corresponde al identificador del sensor.
      */
@@ -35,11 +35,16 @@ public class SensorHumedad1 {
         PrintWriter pw;
 
         try {
-            // Dirección IP del servidor (localhost en este caso)
-            ipServidor = InetAddress.getByName("localhost");
-
-            // Crear conexión con el servidor en el puerto 20000
-            Socket cliente = new Socket(ipServidor, 20000);
+            String controladorHost = System.getenv("CONTROLADOR_HOST");
+            if (controladorHost == null) {
+                controladorHost = "localhost";
+            }
+            String controladorPort = System.getenv("CONTROLADOR_PORT");
+            if (controladorPort == null) {
+                controladorPort = "20000";
+            }
+            ipServidor = InetAddress.getByName(controladorHost);
+            Socket cliente = new Socket(ipServidor, Integer.parseInt(controladorPort));
             System.out.println("Conectado al servidor: " + cliente);
 
             // Flujo de salida con autoflush activado para enviar datos
@@ -54,7 +59,16 @@ public class SensorHumedad1 {
             sensor.start();
 
             // --- Lógica RMI ---
-            int port = 22000;
+            String sensorHostname = System.getenv("HOSTNAME");
+            if (sensorHostname == null) {
+                sensorHostname = "localhost";
+            }
+            String envPort = System.getenv("PORT");
+            if (envPort == null) {
+                envPort = "22000";
+            }
+            int port = Integer.parseInt(envPort);
+
             String name = "SensorHumedadRMI" + id;
             HiloServerRMI hiloServerRMI = new HiloServerRMI(sensor);
 
@@ -65,7 +79,7 @@ public class SensorHumedad1 {
                 System.out.println("RMI registry already running on port " + port);
             }
 
-            Naming.rebind("rmi://localhost:" + port + "/" + name, hiloServerRMI);
+            Naming.rebind("rmi://" + sensorHostname + ":" + port + "/" + name, hiloServerRMI);
             System.out.println(name + " bound in registry");
 
         } catch (UnknownHostException e) {
